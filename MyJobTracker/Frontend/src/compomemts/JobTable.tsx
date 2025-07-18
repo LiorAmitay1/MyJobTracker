@@ -14,7 +14,8 @@ function JobTable() {
   useEffect(() => {
     fetch('http://localhost:8000/jobs')
       .then(response => response.json())
-      .then(data => setJobs(data));
+      .then(data => setJobs(data))
+      .catch(err => console.error("Failed to fetch jobs:", err));
   }, []);
 
   return (
