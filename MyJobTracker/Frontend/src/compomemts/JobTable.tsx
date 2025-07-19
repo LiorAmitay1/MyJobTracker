@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Box, Table, TableHead, TableBody, TableCell , TableRow, TableContainer, Paper } from '@mui/material';
+
+
 
 type Job = {
   company: string;
@@ -19,28 +22,33 @@ function JobTable() {
   }, []);
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>Company</th>
-          <th>Position</th>
-          <th>Date Posted</th>
-          <th>Date Applied</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
+    <Box sx={{ padding: 4, maxWidth: 1000, margin: '0 auto' }}>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{'& .MuiTableCell-root': {backgroundColor: '#c5c5c5ff',color: 'black',fontWeight: 'bold' }}}>
+              <TableCell>Company</TableCell>
+              <TableCell>Position</TableCell>
+              <TableCell>Date Posted</TableCell>
+              <TableCell>Date Applied</TableCell>
+              <TableCell>Status</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
         {jobs.map((job, index) => (
-          <tr key={index}>
-            <td>{job.company}</td>
-            <td>{job.position}</td>
-            <td>{job.datePosted}</td>
-            <td>{job.dateApplied}</td>
-            <td>{job.status}</td>
-          </tr>
+          <TableRow key={index} sx={{'&:hover': { backgroundColor: '#eceaeaff' } 
+      }}>
+            <TableCell>{job.company}</TableCell>
+            <TableCell>{job.position}</TableCell>
+            <TableCell>{job.datePosted}</TableCell>
+            <TableCell>{job.dateApplied}</TableCell>
+            <TableCell>{job.status}</TableCell>
+          </TableRow>
         ))}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table >
+    </TableContainer>
+    </Box>
   );
 }
 
