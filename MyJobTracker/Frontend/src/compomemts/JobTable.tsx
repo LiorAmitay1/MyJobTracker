@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Box, Table, TableHead, TableBody, TableCell , TableRow, TableContainer, Paper } from '@mui/material';
-
+import {TextField, Button, IconButton, Box, Table, TableHead, TableBody, TableCell , TableRow, TableContainer, Paper } from '@mui/material';
+import deleteBeforeIcon from '../assets/delete_before.png';
+import deleteHoverIcon from '../assets/delete_hover.png';
 
 
 type Job = {
+  id: number;
   company: string;
   position: string;
   datePosted: string;
@@ -13,6 +15,8 @@ type Job = {
 
 function JobTable() {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     fetch('http://localhost:8000/jobs')
@@ -21,8 +25,59 @@ function JobTable() {
       .catch(err => console.error("Failed to fetch jobs:", err));
   }, []);
 
+  function handleDelete(id: number) {
+    fetch(`http://localhost:8000/jobs/${id}`, {
+      method: 'DELETE'
+    })
+      .then(response => {
+        if (response.ok) {
+          setJobs(prevJobs => prevJobs.filter(job => job.id !== id));
+        } else {
+          alert('Failed to delete job.');
+        }
+      })
+      .catch(error => {
+        console.error('Error deleting job:', error);
+      });
+  }
+
+    function handleFieldChange(id: number, field: keyof Job, value: string) {
+    setJobs(prevJobs =>
+      prevJobs.map(job =>
+        job.id === id ? { ...job, [field]: value } : job
+      )
+    );
+  }
+
+  function handleSave(job: Job) {
+    fetch(`http://localhost:8000/jobs/${job.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(job)
+    })
+      .then(response => {
+        if (!response.ok) {
+          alert('Failed to update job.');
+        }
+      })
+      .catch(error => {
+        console.error('Error updating job:', error);
+      });
+  }
+
+
   return (
+    <>
+    
+
     <Box sx={{ padding: 4, maxWidth: 1000, margin: '0 auto' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 2 }}>
+        <Button onClick={() => setEditMode(!editMode)}
+          variant="outlined"
+          sx={{  borderColor: 'black', color: 'Black', '&:hover': { backgroundColor: '#c5c5c5ff' } }}>
+          {editMode ? 'Exit Edit Mode' : 'Edit Mode'}
+        </Button>
+      </Box>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -35,20 +90,81 @@ function JobTable() {
         </TableRow>
       </TableHead>
       <TableBody>
-        {jobs.map((job, index) => (
-          <TableRow key={index} sx={{'&:hover': { backgroundColor: '#eceaeaff' } 
-      }}>
-            <TableCell>{job.company}</TableCell>
-            <TableCell>{job.position}</TableCell>
-            <TableCell>{job.datePosted}</TableCell>
-            <TableCell>{job.dateApplied}</TableCell>
-            <TableCell>{job.status}</TableCell>
+        {jobs.map((job) => (
+          <TableRow key={job.id} sx={{'&:hover': { backgroundColor: '#eceaeaff' }  }}>
+
+            <TableCell>{editMode ? (
+              <TextField
+              variant="standard"
+              value={job.company}
+              onChange={(e) => handleFieldChange(job.id, 'company', e.target.value)}
+              fullWidth
+              />
+            ) :(job.company)}
+            </TableCell>
+
+            <TableCell>{editMode ? (<TextField
+              variant="standard"
+              value = {job.position}
+              onChange={(e) => handleFieldChange(job.id, "position", e.target.value)}
+              fullWidth
+            />):(job.position)}
+            </TableCell>
+
+
+            <TableCell>{editMode ? (<TextField
+              variant="standard"
+              value = {job.datePosted}
+              onChange={(e) => handleFieldChange(job.id, "datePosted", e.target.value)}
+              fullWidth
+            />):(job.datePosted)}
+            </TableCell>
+
+
+            <TableCell>{editMode ? (<TextField
+              variant="standard"
+              value = {job.dateApplied}
+              onChange={(e) => handleFieldChange(job.id, "dateApplied", e.target.value)}
+              fullWidth
+            />):(job.dateApplied)}
+            </TableCell>
+
+
+            <TableCell>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {editMode ? (
+                  <TextField
+                    variant="standard"
+                    value={job.status}
+                    onChange={(e) => handleFieldChange(job.id, 'status', e.target.value)}
+                    sx={{ minWidth: 80 }}  // אופציונלי - שומר על מינימום רוחב קבוע
+                  />
+                ) : (
+                  <span>{job.status}</span>
+                )}
+                <IconButton
+                  onClick={() => handleDelete(job.id)}
+                  onMouseEnter={() => setHoveredRow(job.id)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                  sx={{
+                    padding: 0, visibility: editMode ? 'visible' : 'hidden' 
+                  }}
+                  >
+                  <img
+                    src={hoveredRow === job.id ? deleteHoverIcon : deleteBeforeIcon}
+                    alt="Delete"
+                    style={{ width: 20, height: 20 }}
+                  />
+                  </IconButton>
+              </Box>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table >
     </TableContainer>
     </Box>
+    </>
   );
 }
 
