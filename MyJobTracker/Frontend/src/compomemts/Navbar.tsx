@@ -10,9 +10,8 @@ function Navbar() {
 
         <Box sx={{ flexGrow: 0.5 }}>
         <Button color="inherit" component={Link} to="/">Home</Button>
-        <Button color="inherit" component={Link} to="/jobs">Jobs</Button>
-        <Button color="inherit" component={Link} to="/about">About</Button>
         <Button color="inherit" component={Link} to="/add-job">Add Job</Button>
+        <Button color="inherit" component={Link} to="/about">About</Button>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', marginRight: 'auto' }}>
         <Typography variant="h6" sx={{ fontWeight: 'bold', marginRight: '10px' }}>

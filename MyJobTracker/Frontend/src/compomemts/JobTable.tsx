@@ -17,6 +17,9 @@ function JobTable() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [changedJobIds, setChangedJobIds] = useState<Set<number>>(new Set());
+
+
 
   useEffect(() => {
     fetch('http://localhost:8000/jobs')
@@ -42,12 +45,25 @@ function JobTable() {
   }
 
     function handleFieldChange(id: number, field: keyof Job, value: string) {
-    setJobs(prevJobs =>
-      prevJobs.map(job =>
-        job.id === id ? { ...job, [field]: value } : job
-      )
-    );
+      setJobs(prevJobs =>
+        prevJobs.map(job =>
+          job.id === id ? { ...job, [field]: value } : job
+        )
+      );
+
+      setChangedJobIds(prevIds => new Set(prevIds).add(id));
+    }
+
+    function saveAllChanges() {
+    changedJobIds.forEach(id => {
+      const jobToUpdate = jobs.find(job => job.id === id);
+      if (jobToUpdate) {
+        handleSave(jobToUpdate);
+      }
+    });
+    setChangedJobIds(new Set());  // מאפס את הסט אחרי השמירה
   }
+
 
   function handleSave(job: Job) {
     fetch(`http://localhost:8000/jobs/${job.id}`, {
@@ -72,11 +88,19 @@ function JobTable() {
 
     <Box sx={{ padding: 4, maxWidth: 1000, margin: '0 auto' }}>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 2 }}>
-        <Button onClick={() => setEditMode(!editMode)}
+        <Button
+          onClick={() => {
+            if (editMode) {
+              saveAllChanges();
+            }
+            setEditMode(!editMode);
+          }}
           variant="outlined"
-          sx={{  borderColor: 'black', color: 'Black', '&:hover': { backgroundColor: '#c5c5c5ff' } }}>
-          {editMode ? 'Exit Edit Mode' : 'Edit Mode'}
+          sx={{ borderColor: 'black', color: 'Black', '&:hover': { backgroundColor: '#c5c5c5ff' } }}
+        >
+          {editMode ? 'Exit Edit Jobs' : 'Edit Jobs'}
         </Button>
+
       </Box>
       <TableContainer component={Paper}>
         <Table>
