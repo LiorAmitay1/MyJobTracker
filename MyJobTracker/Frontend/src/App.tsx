@@ -1,11 +1,12 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import JobTable from "./compomemts/JobTable"
-// import LoginPage from './components/LoginPage';
-import Navbar from './compomemts/Navbar';
-import AddJob from './compomemts/AddJob';
+import JobTable from "./components/JobTable"
 
+import Navbar from './components/Navbar';
+import AddJob from './components/AddJob';
 
-
+import About from './components/About';
+import Login from './components/Login';
+import Register from './components/Register';
 
 function App() {
   
@@ -15,8 +16,10 @@ function App() {
       <Navbar />
         <Routes>
           <Route path="/" element={<JobTable />} />
-          {/* <Route path="/login" element={<LoginPage />} /> */}
           <Route path="/add-job" element={<AddJob />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
     </BrowserRouter>
       

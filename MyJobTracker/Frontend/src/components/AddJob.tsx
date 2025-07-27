@@ -106,7 +106,13 @@ function AddJob() {
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
             />
-            <Button variant="outlined" onClick={handleSubmit}>Add Job</Button>
+            
+            <Button variant="outlined"
+                sx={{ borderColor: 'black', 
+                color: 'Black', 
+                '&:hover': { backgroundColor: '#c5c5c5ff' } }}
+                onClick={handleSubmit}>Add Job
+            </Button>
             </Box>
         </div>
     </Paper>
