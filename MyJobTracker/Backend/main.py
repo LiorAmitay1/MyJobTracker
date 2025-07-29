@@ -1,18 +1,18 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from schemas import JobCreate
-from models import Job
+from schemas import JobCreate, UserCreate, UserLogin
+from models import Job, User
 from database import get_db
 from sqlalchemy.orm import Session
-
+import bcrypt
 
 app = FastAPI()
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # בזמן פיתוח – כל מקור מותר
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -63,3 +63,29 @@ def update_job(job_id: int, job: JobCreate, db: Session = Depends(get_db)):
         return {"message": "Job updated successfully", "job_id": job_to_update.id}
     else:
         return {"error": "Job not found"}, 404
+
+# User Registration
+@app.post("/users")
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    hashed = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
+    new_user = User(
+        username=user.username,
+        email=user.email,
+        hashed_password=hashed.decode('utf-8') 
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return {"message": "User created successfully", "user_id": new_user.id}
+
+# User Login
+@app.post("/login")
+def login(user: UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == user.email).first()
+    if not db_user:
+        return {"error": "User not found"}, 404
+
+    if not bcrypt.checkpw(user.password.encode('utf-8'), db_user.hashed_password.encode('utf-8')):
+        return {"error": "Incorrect password"}, 401
+
+    return {"message": "Login successful", "user_id": db_user.id, "username": db_user.username}
